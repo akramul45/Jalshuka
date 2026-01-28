@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>জালশুকা অফলাইন ভোটার তথ্য</title>
+<script src="xlsx.full.min.js"></script>
+<style>
+@font-face { font-family: 'Kalpurush'; src: url('kalpurush.ttf'); }
+*{box-sizing:border-box;outline:none}
+body{font-family:'Kalpurush',sans-serif;margin:0;padding:5px;background-color:#0f172a;color:#e2e8f0;display:flex;flex-direction:column;align-items:center;min-height:100vh}
+.container{width:100%;max-width:800px;background:#1e293b;padding:15px;border-radius:12px;box-shadow:0 5px 15px rgba(0,0,0,0.5);margin-bottom:15px;position:relative}
+h2{text-align:center;color:#38bdf8;margin:0 0 15px 0;font-size:24px;border-bottom:1px solid #334155;padding-bottom:5px}
+#loading-indicator{text-align:center;color:#fbbf24;margin-bottom:10px}
+.file-upload-wrapper{display:none;text-align:center;margin-bottom:15px}
+.custom-file-upload{border:2px dashed #ef4444;display:block;padding:10px;cursor:pointer;border-radius:8px;color:#009;font-weight:bold;width:100% ;
+    background:#900;  }
+input[type="file"]{display:none}
+.search-container{position:relative;margin-bottom:15px;display:none}
+#search-box{width:100%;padding:10px;background:#0f172a;border:1px solid #475569;color:#fff;border-radius:6px;font-size:16px;font-family:inherit}
+#suggestions-box{position:absolute;top:100%;left:0;width:100%;background:#1e293b;border:1px solid #475569;max-height:250px;overflow-y:auto;z-index:100;display:none}
+.suggestion-item{padding:10px;border-bottom:1px solid #334155;cursor:pointer;display:flex;justify-content:space-between}
+.suggestion-item:hover{background:#38bdf8;color:#0f172a}
+#family-panel{background:#0f172a;border:1px solid #fbbf24;border-radius:8px;margin-bottom:15px;padding:10px;display:none;position:relative}
+.family-scroll-view{display:flex;overflow-x:auto;gap:10px;padding-bottom:5px}
+.member-card{min-width:120px;background:#1e293b;border:1px solid #475569;padding:8px;border-radius:6px;text-align:center;flex-shrink:0}
+.close-panel-btn{position:absolute;top:-8px;right:-8px;background:#ef4444;color:#fff;width:24px;height:24px;border-radius:50%;text-align:center;line-height:22px;cursor:pointer}
+#details-card{background:#1e293b;padding:15px;border:1px solid #38bdf8;border-radius:10px;margin-bottom:15px;display:none;text-align:center}
+.info-label{color:#94a3b8;font-size:12px;margin-top:8px}
+.info-value{font-size:20px;color:#fff;font-weight:bold;border-bottom:1px dashed #334155}
+.clickable-parent{color:#38bdf8;cursor:pointer;text-decoration:underline}
+.table-container{width:100%;max-width:800px;overflow-x:auto;display:none}
+table{width:100%;border-collapse:collapse;white-space:nowrap}
+th,td{padding:10px;text-align:left;border-bottom:1px solid #334155}
+th{background:#0f172a;color:#38bdf8;position:sticky;top:0}
+tbody tr:hover{background:#38bdf8;color:#0f172a;font-weight:bold;cursor:pointer}
+tbody tr:hover td{color:#0f172a}
+</style>
+</head>
+<body>
+    <header>
+        <h2> জালশুকা ভোটার তথ্য</h2>
+    </header>
+<div class="container">
+
+<div id="loading-indicator">লোড হচ্ছে...</div>
+<div class="file-upload-wrapper" id="upload-wrapper">
+<label for="excel-file" class="custom-file-upload">ফাইল পাওয়া যায়নি। এখানে ক্লিক করে VT.xlsx সিলেক্ট করুন</label>
+<input type="file" id="excel-file" accept=".xlsx,.xls"/>
+</div>
+<div class="search-container" id="search-container">
+<input type="text" id="search-box" placeholder="নাম বা নম্বর দিয়ে খুঁজুন..." autocomplete="off"/>
+<div id="suggestions-box"></div>
+</div>
+<div id="family-panel"></div>
+<div id="details-card"></div>
+</div>
+<div class="table-container" id="table-container">
+<table id="data-table"><thead></thead><tbody></tbody></table>
+</div>
+ <script>
+let COL_NAME="নাম",COL_FATHER="পিতা",COL_MOTHER="মাতা",COL_VOTER="ভোটার নং",excelData=[],DEFAULT_FILE="VT.xlsx";
+window.addEventListener('DOMContentLoaded',()=>{
+fetch(DEFAULT_FILE).then(res=>{if(!res.ok)throw new Error();return res.arrayBuffer()})
+.then(data=>processData(data)).catch(()=>{document.getElementById('loading-indicator').style.display='none';document.getElementById('upload-wrapper').style.display='block'})});
+document.getElementById('excel-file').addEventListener('change',e=>{if(e.target.files[0]){let r=new FileReader();r.onload=ev=>processData(ev.target.result);r.readAsArrayBuffer(e.target.files[0])}});
+function processData(buf){try{let wb=XLSX.read(new Uint8Array(buf),{type:'array'}),ws=wb.Sheets[wb.SheetNames[0]];excelData=XLSX.utils.sheet_to_json(ws,{defval:""});if(excelData.length>0){detectHeaders(excelData[0]);uiReady();renderTable(excelData)}else{alert("ডেটা নেই")}}catch(e){alert("সমস্যা হয়েছে")}}
+function detectHeaders(r){Object.keys(r).forEach(h=>{let t=h.trim();if(t.includes("নাম")&&!t.includes("পিতা"))COL_NAME=h;if(t.includes("পিতা"))COL_FATHER=h;if(t.includes("মাতা"))COL_MOTHER=h;if(t.includes("ভোটার")||t.includes("ID")||t.includes("নং"))COL_VOTER=h})}
+function uiReady(){document.getElementById('loading-indicator').style.display='none';document.getElementById('upload-wrapper').style.display='none';document.getElementById('search-container').style.display='block';document.getElementById('table-container').style.display='block'}
+function renderTable(d){let th=document.querySelector('#data-table thead'),tb=document.querySelector('#data-table tbody');th.innerHTML='';tb.innerHTML='';if(d.length===0)return;
+let ks=Object.keys(d[0]),hr='<tr>';ks.forEach(k=>hr+=`<th>${k}</th>`);th.innerHTML=hr+'</tr>';
+d.slice(0,100).forEach(r=>{let idx=excelData.indexOf(r),tr=`<tr onclick="selPer(${idx})">`;ks.forEach(k=>tr+=`<td>${r[k]}</td>`);tb.insertAdjacentHTML('beforeend',tr+'</tr>')})}
+window.selPer=function(i){let p=excelData[i];showDet(p);document.getElementById('suggestions-box').style.display='none';document.getElementById('search-box').value=p[COL_NAME]}
+function showDet(p){let c=document.getElementById('details-card'),v=String(p[COL_VOTER]||"000");
+document.getElementById('family-panel').style.display='none';
+c.innerHTML=`<div style="color:#38bdf8;margin-bottom:10px;font-size:18px">বিস্তারিত</div><div class="info-label">নাম</div><div class="info-value">${p[COL_NAME]}</div><div style="display:flex;justify-content:space-around;margin-top:10px"><div><div class="info-label">পিতা</div><div class="info-value clickable-parent" onclick="showFam('${p[COL_FATHER]}')">${p[COL_FATHER]}</div></div><div><div class="info-label">মাতা</div><div class="info-value">${p[COL_MOTHER]}</div></div></div><div style="background:#334155;padding:5px 15px;border-radius:8px;margin-top:15px;display:inline-flex;align-items:baseline;gap:15px;border:1px solid #475569"><span style="font-size:18px;color:#cbd5e1;letter-spacing:1px">${v.slice(0,-3)}</span><span style="font-size:32px;font-weight:bold;color:#fbbf24">${v.slice(-3)}</span></div>`;
+c.style.display='block';window.scrollTo({top:0,behavior:'smooth'})}
+window.showFam=function(f){if(!f||f.length<2)return;let sibs=excelData.filter(i=>String(i[COL_FATHER]).trim()===f.trim());if(sibs.length===0)return;renderTable(sibs);
+let p=document.getElementById('family-panel'),h='';sibs.forEach(s=>{h+=`<div class="member-card" onclick="selPer(${excelData.indexOf(s)})"><div style="font-size:12px;color:#fff">${s[COL_NAME]}</div><div style="color:#fbbf24">${String(s[COL_VOTER]).slice(-3)}</div></div>`});
+p.innerHTML=`<div class="close-panel-btn" onclick="this.parentElement.style.display='none'">x</div><div style="text-align:center;color:#94a3b8;font-size:13px;margin-bottom:5px">পিতা: ${f} (${sibs.length})</div><div class="family-scroll-view">${h}</div>`;p.style.display='block'}
+let sb=document.getElementById('search-box'),sg=document.getElementById('suggestions-box');
+sb.addEventListener('keyup',e=>{let v=e.target.value.toLowerCase();document.getElementById('details-card').style.display='none';document.getElementById('family-panel').style.display='none';sg.innerHTML='';if(v.length<1){renderTable(excelData);sg.style.display='none';return}
+let f=excelData.filter(i=>Object.values(i).some(x=>String(x).toLowerCase().includes(v)));renderTable(f);
+if(f.length>0){sg.style.display='block';f.slice(0,8).forEach(i=>{let d=document.createElement('div');d.className='suggestion-item';d.innerHTML=`<span>${i[COL_NAME]}</span><span style="color:#fbbf24">${String(i[COL_VOTER]).slice(-3)}</span>`;d.onclick=()=>selPer(excelData.indexOf(i));sg.appendChild(d)})}else{sg.style.display='none'}});
+document.addEventListener('click',e=>{if(e.target!==sb&&e.target!==sg)sg.style.display='none'});
+</script>
+    <footer style="background-color: #1a1a1a; color: #ffffff; padding: 4px 0; 
+         text-align: center; width: 100%;">
+    
+    <style>
+        /* লিংক হোভার ইফেক্ট */
+        .footer-link { margin-top: 25px;
+            text-decoration: none !important;
+            color: #b3b3b3 !important;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        .footer-link:hover { 
+            color: #ffffff !important;
+        }
+        /* লিংকের নিচে এনিমেশন দাগ */
+        .footer-link::after {
+            content: '';
+            display: block;
+            width: 0;
+            height: 2px;
+            background: #00d2d3;
+            transition: width 0.3s;
+            margin-top: 25px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .footer-link:hover::after {
+            width: 100%;
+        }
+        /* মোবাইলের জন্য রেসপনসিভনেস */
+        @media (max-width: 600px) {
+            .footer-nav {
+                flex-direction: row !important;
+                gap: 15px !important;
+            }
+            .divider {
+                width: 100% !important;
+            }
+        }
+    </style>
+
+    <div style="max-width: 1200px; margin: 0 auto; padding: 0 0px; display: flex; flex-direction: column; align-items: center; gap: 20px;">
+        
+        <div class="footer-nav" style="display: flex; gap: 25px; justify-content: center; align-items: center; text-transform: uppercase; letter-spacing: 1px; font-size: 14px; font-weight: 500;">
+            <a href="#" class="footer-link">about</a>
+            <span style="color: #444;">|</span>
+            <a href="#" class="footer-link">help</a>
+            <span style="color: #444;">|</span>
+            <a href="UG.html" class="footer-link">User Guide</a>
+        </div>
+
+        <div class="divider" style="height: 1px; width: 300px; background-color: #333; margin: 5px 0;"></div>
+
+        <div style="font-size: 14px; color: #888; line-height: 1.6;">
+            &copy; ২০২৫ প্রস্তুতকারক 
+            <span style="color: #fff; font-weight: bold; margin: 0 5px;">আকরামুল হক</span> 
+            <span style="color: #00d2d3; white-space: nowrap;">(০১৫৭১২৩৬৪২৬)</span>
+        </div>
+
+    </div>
+</footer>
+
+</body>
+</html>

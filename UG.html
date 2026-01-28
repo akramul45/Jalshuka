@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ব্যবহারকারী নির্দেশিকা</title>
+    <style>
+        /* ফন্ট লোডিং (অফলাইন) */
+        @font-face { font-family: 'Kalpurush'; src: url('kalpurush.ttf'); }
+        
+        /* গ্লোবাল স্টাইল - মূল অ্যাপের সাথে সামঞ্জস্যপূর্ণ */
+        * { box-sizing: border-box; }
+        body {
+            font-family: 'Kalpurush', sans-serif;
+            margin: 0;
+            padding: 10px;
+            background-color: #0f172a; /* গাঢ় ব্যাকগ্রাউন্ড */
+            color: #e2e8f0;
+            line-height: 1.6;
+            display: flex;
+            justify-content: center;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 800px;
+            background: #1e293b;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.6);
+            border: 1px solid #334155;
+        }
+
+        h1 {
+            text-align: center;
+            color: #38bdf8;
+            border-bottom: 2px solid #334155;
+            padding-bottom: 15px;
+            margin-top: 0;
+        }
+
+        h3 { color: #fbbf24; margin-top: 25px; margin-bottom: 10px; border-left: 4px solid #fbbf24; padding-left: 10px; }
+
+        p { margin: 5px 0 15px 0; color: #cbd5e1; font-size: 16px; }
+
+        ul { margin: 0; padding-left: 20px; color: #cbd5e1; }
+        li { margin-bottom: 8px; }
+
+        .highlight { color: #38bdf8; font-weight: bold; }
+        .warning { color: #ef4444; font-weight: bold; }
+        .btn-look { background: #334155; padding: 2px 8px; border-radius: 4px; border: 1px solid #475569; font-size: 14px; }
+
+        /* ব্যাক বাটন */
+        .back-btn {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            margin-top: 30px;
+            background: #38bdf8;
+            color: #0f172a;
+            text-align: center;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 18px;
+            border-radius: 8px;
+            transition: 0.3s;
+        }
+        .back-btn:hover { background: #0ea5e9; }
+
+        /* টিপস বক্স */
+        .tips-box {
+            background: rgba(56, 189, 248, 0.1);
+            border: 1px dashed #38bdf8;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>ব্যবহারকারী নির্দেশিকা</h1>
+
+        <p>ভোটার তথ্য অনুসন্ধান অ্যাপে আপনাকে স্বাগতম। এই অ্যাপটি ব্যবহার করার নিয়মাবলী নিচে বিস্তারিত আলোচনা করা হলো।</p>
+
+         
+
+        <h3>২. ডেটা লোড করা</h3>
+        <p>অ্যাপটি ওপেন করার সাথে সাথে এটি অটোমেটিক <span class="highlight">VT.xlsx</span> ফাইলটি খোঁজার চেষ্টা করবে।</p>
+        <ul>
+            <li>যদি ফাইল পাওয়া যায়, তবে সার্চ বক্স চলে আসবে।</li>
+            <li>যদি ফাইল না পাওয়া যায়, তবে লাল রঙের একটি বক্স আসবে যেখানে ক্লিক করে আপনি ম্যানুয়ালি ফাইল সিলেক্ট করতে পারবেন।</li>
+        </ul>
+
+        <h3>৩. অনুসন্ধান (Search) পদ্ধতি</h3>
+        <p>সার্চ বক্সে আপনি দুইভাবে খুঁজতে পারবেন:</p>
+        <ul>
+            <li><strong>নাম দিয়ে:</strong> ব্যক্তির নামের যেকোনো অংশ লিখলে নিচে তালিকা আসবে।</li>
+            <li><strong>ভোটার নম্বর দিয়ে:</strong> ভোটার নম্বরের শেষ ৩ বা ৪ ডিজিট লিখলে দ্রুত খুঁজে পাওয়া যাবে।</li>
+        </ul>
+
+        <h3>৪. বিস্তারিত তথ্য দেখা</h3>
+        <p>সার্চ রেজাল্ট অথবা তালিকা থেকে কোনো ব্যক্তির নামের উপর ক্লিক করলে তার বিস্তারিত তথ্য একটি কার্ডে প্রদর্শিত হবে। এখানে নাম, পিতা-মাতার নাম এবং ভোটার নম্বর বড় করে দেখা যাবে।</p>
+
+        <h3>৫. ফ্যামিলি ট্রি (বিশেষ ফিচার)</h3>
+        <p>এটি এই অ্যাপের সবচেয়ে বিশেষ সুবিধা।</ বিস্তারিত কার্ডে যখন <strong>পিতার নাম</strong> নীল রঙে দেখাবে:</p>
+        <ul>
+            <li>পিতার নামের উপর ক্লিক করুন।</li>
+            <li>একই পিতার অধীনে থাকা সকল সন্তান (ভাই-বোন)-এর তালিকা কার্ডের ঠিক উপরে একটি নতুন প্যানেলে চলে আসবে।</li>
+            <li>এই প্যানেলটি ডান-বাম দিকে স্লাইড করে সবার নাম দেখা যাবে।</li>
+            <li>প্যানেলটি বন্ধ করতে ডানদিকের উপরে লাল <span class="warning">X</span> বাটনে ক্লিক করুন।</li>
+        </ul>
+
+        <div class="tips-box">
+            <strong>💡 টিপস:</strong> যদি বাংলা লেখা ভেঙে যায় বা ঠিকমতো না দেখায়, তবে নিশ্চিত হোন যে <span class="highlight">kalpurush.ttf</span> ফাইলটি সঠিক ফোল্ডারে আছে।
+        </div>
+
+        <a href="Vot.html" class="back-btn">⬅ মূল অ্যাপে ফিরে যান</a>
+    </div>
+
+</body>
+</html>
