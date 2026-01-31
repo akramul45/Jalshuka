@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ব্যবহারকারী নির্দেশিকা - ভোটার ইনফো</title>
+    <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* --- গ্লোবাল ভেরিয়েবল --- */
+        :root {
+            --bg-dark: #0f172a;       /* মূল ব্যাকগ্রাউন্ড */
+            --card-bg: #1e293b;       /* কার্ড ব্যাকগ্রাউন্ড */
+            --text-main: #e2e8f0;     /* প্রধান টেক্সট */
+            --text-muted: #94a3b8;    /* অস্পষ্ট টেক্সট */
+            --accent-blue: #38bdf8;   /* নীল হাইলাইট */
+            --accent-yellow: #fbbf24; /* হলুদ হাইলাইট */
+            --border-color: #334155;  /* বর্ডার */
+            --dev-bg: #172554;        /* ডেভেলপার সেকশন ব্যাকগ্রাউন্ড */
+        }
+
+        /* --- রিসেট এবং বেসিক স্টাইল --- */
+        * { box-sizing: border-box; }
+        @font-face{font-family:'Kalpurush';src:url('kalpurush.ttf')}*{box-sizing:border-box;outline:0}body{font-family:'Kalpurush',sans-serif;margin:0;padding:0;background:#0f172a;color:#e2e8f0;display:flex;flex-direction:column;align-items:center;min-height:100vh}
+ 
+        body {
+            font-family: 'Kalpurush', sans-serif;
+            margin: 0;
+            padding: 15px;
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            line-height: 1.7;
+            display: flex;
+            justify-content: center;
+            min-height: 100vh;
+        }
+
+        /* --- মেইন কন্টেইনার --- */
+        .container {
+            width: 100%;
+            max-width: 850px;
+            background: var(--card-bg);
+            padding: 25px;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            border: 1px solid var(--border-color);
+        }
+
+        /* --- হেডার সেকশন --- */
+        header {
+            text-align: center;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            color: var(--accent-blue);
+            margin: 0;
+            font-size: 28px;
+            font-weight: 700;
+        }
+
+        /* --- সেকশন স্টাইল --- */
+        .guide-section {
+            margin-bottom: 35px;
+        }
+
+        h3 {
+            color: var(--accent-yellow);
+            font-size: 20px;
+            margin-bottom: 15px;
+            border-left: 4px solid var(--accent-yellow);
+            padding-left: 12px;
+            background: rgba(251, 191, 36, 0.05);
+            padding-top: 5px;
+            padding-bottom: 5px;
+            border-radius: 0 8px 8px 0;
+        }
+
+        p { margin: 0 0 10px 0; color: #cbd5e1; font-size: 16px; }
+
+        ul { margin: 0; padding-left: 20px; list-style-type: none; }
+        li { 
+            position: relative; 
+            padding-left: 20px; 
+            margin-bottom: 10px;
+            color: #d1d5db;
+        }
+        li::before {
+            content: "➤";
+            color: var(--accent-blue);
+            position: absolute;
+            left: 0;
+            font-size: 12px;
+            top: 5px;
+        }
+
+        /* --- ডেভেলপার কার্ড (স্পেশাল ডিজাইন) --- */
+        .dev-card {
+            background: linear-gradient(145deg, #1e293b, #0f172a);
+            border: 1px solid var(--accent-blue);
+            padding: 25px;
+            border-radius: 12px;
+            text-align: center;
+            margin-bottom: 40px;
+            box-shadow: 0 0 15px rgba(56, 189, 248, 0.1);
+        }
+        .dev-title {
+            color: var(--text-muted);
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 10px;
+        }
+        .dev-name {
+            color: var(--accent-blue);
+            font-size: 26px;
+            font-weight: 700;
+            margin: 0 0 10px 0;
+        }
+        .dev-desc {
+            font-size: 15px;
+            font-style: italic;
+            color: #94a3b8;
+            margin-bottom: 15px;
+        }
+        .contact-btn {
+            display: inline-block;
+            background: rgba(34, 197, 94, 0.1);
+            color: #4ade80;
+            border: 1px solid #22c55e;
+            padding: 8px 20px;
+            border-radius: 50px;
+            font-weight: bold;
+            text-decoration: none;
+            font-size: 18px;
+        }
+
+        /* --- হাইলাইট ব্যাজ --- */
+        .badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 6px;
+            font-size: 0.9em;
+            font-weight: 600;
+            background: #334155;
+            border: 1px solid #475569;
+        }
+        .highlight { color: var(--accent-blue); font-weight: bold; }
+        .active-tab { background: var(--accent-blue); color: #000; }
+
+        /* --- টিপস বক্স --- */
+        .tips-box {
+            background: rgba(56, 189, 248, 0.1);
+            border: 1px dashed var(--accent-blue);
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            color: #bae6fd;
+            font-size: 15px;
+        }
+
+        /* --- ব্যাক বাটন --- */
+        .back-btn {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            margin-top: 30px;
+            background: var(--accent-blue);
+            color: #0f172a;
+            text-align: center;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 18px;
+            border-radius: 8px;
+            transition: 0.3s;
+        }
+        .back-btn:hover { 
+            background: #0ea5e9; 
+            transform: translateY(-2px);
+        }
+
+        /* রেসপন্সিভ */
+        @media (max-width: 600px) {
+            .container { padding: 15px; }
+            h1 { font-size: 24px; }
+            .dev-name { font-size: 22px; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <div class="dev-card">
+            <div class="dev-title">প্রস্তুতকারক ও স্বত্বাধিকারী</div>
+            <h2 class="dev-name">মোঃ আকরামুল হক</h2>
+            <p class="dev-desc">"এই সফটওয়্যারটির সম্পূর্ণ ডিজাইন, ডেভেলপমেন্ট এবং স্বত্ব আমার নিজস্ব চিন্তাধারা ও পরিশ্রমের ফসল।"</p>
+            <a href="tel:+8801571236426" class="contact-btn">📞 ০১৫৭১২৩৬৪২৬</a>
+        </div>
+
+        <header>
+            <h1>ব্যবহারকারী নির্দেশিকা</h1>
+            <p style="margin-top: 10px; color: #94a3b8;">ভোটার ইনফো অ্যাপ ব্যবহারের সহজ নিয়মাবলী</p>
+        </header>
+
+        <div class="guide-section">
+            <h3>১. সেটআপ ও ডেটা লোড</h3>
+            <p>অ্যাপটি ওপেন করার সাথে সাথে এটি অটোমেটিক <span class="highlight">VT.xlsx</span> ফাইলটি খোঁজার চেষ্টা করবে।</p>
+            <ul>
+                <li>ফাইল পাওয়া গেলে সরাসরি সার্চ অপশন চালু হবে।</li>
+                <li>ফাইল না পাওয়া গেলে একটি লাল বক্স আসবে, সেখানে ক্লিক করে আপনার ডিভাইসের ফোল্ডার থেকে ফাইলটি সিলেক্ট করে দিন।</li>
+            </ul>
+        </div>
+
+        <div class="guide-section">
+            <h3>২. অনুসন্ধান (Search) পদ্ধতি</h3>
+            <p>স্ক্রিনের উপরে থাকা তিনটি অপশনের মাধ্যমে আপনি তথ্য খুঁজতে পারবেন:</p>
+            <ul>
+                <li><span class="badge">ক্রমিক</span> : ভোটারের সিরিয়াল নম্বর দিয়ে খুঁজতে।</li>
+                <li><span class="badge active-tab">নাম</span> : ব্যক্তির নাম দিয়ে খুঁজতে (সবচেয়ে সহজ পদ্ধতি)।</li>
+                <li><span class="badge">পিতা</span> : পিতার নাম দিয়ে খুঁজতে।</li>
+            </ul>
+            <div class="tips-box">
+                <strong>💡 টিপস:</strong> পুরো নাম লেখার প্রয়োজন নেই। নামের যেকোনো অংশ (যেমন: "বিল্লাল") লিখলেই সাজেশন চলে আসবে।
+            </div>
+        </div>
+
+        <div class="guide-section">
+            <h3>৩. বিস্তারিত তথ্য দেখা</h3>
+            <p>সার্চ রেজাল্ট বা তালিকা থেকে কোনো নামের ওপর ক্লিক করলে একটি কার্ড ওপেন হবে।</p>
+            <ul>
+                <li>এখানে ছবিসহ (যদি থাকে) বিস্তারিত তথ্য দেখা যাবে।</li>
+                <li>NID নম্বরের শেষের ৩ বা ৪ ডিজিট <span style="color: #fbbf24; font-weight: bold;">হলুদ রঙে</span> বড় করে দেখানো হবে যাতে সহজে চোখে পড়ে।</li>
+            </ul>
+        </div>
+
+        <div class="guide-section">
+            <h3>৪. ফ্যামিলি ট্রি (বিশেষ ফিচার)</h3>
+            <p>আপনি যদি জানতে চান একই পরিবারের আর কে কে ভোটার তালিকায় আছে, তবে:</p>
+            <ul>
+                <li>কার্ডের ভেতরে <span class="highlight">পিতার নাম</span>-এর ওপর ক্লিক করুন (এটি নীল রঙে থাকবে)।</li>
+                <li>ক্লিক করার সাথে সাথে উপরে একটি প্যানেল আসবে যেখানে ওই পিতার সকল সন্তানের (ভাই-বোন) তালিকা দেখা যাবে।</li>
+                <li>তালিকাটি ডানে-বামে স্লাইড করে সবার নাম দেখতে পারবেন।</li>
+            </ul>
+        </div>
+
+        <a href="index.html" class="back-btn">⬅ মূল অ্যাপে ফিরে যান</a>
+    </div>
+
+</body>
+</html>
