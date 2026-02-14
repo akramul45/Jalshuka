@@ -66,16 +66,89 @@ header {
 }
 .toggle-btn.active { background: var(--cyan); color: #000; font-weight: bold; }
 
-/* --- SEARCH & STATUS --- */
-.search-container { background: var(--bg-card); padding: 20px; border-radius: 12px; border: 1px solid var(--border); margin: 20px 0; }
-#searchInput {
-    width: 100%; padding: 12px 20px; background: #020617; border: 1px solid #334155;
-    border-radius: 50px; color: white; font-size: 16px; box-sizing: border-box;
+/* SEARCH HEADER LAYOUT */
+.search-header {
+    display: flex;
+    justify-content: space-between; /* Space betwen Count and Radios */
+    align-items: center;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
 }
-#searchInput:focus { border-color: var(--cyan); box-shadow: 0 0 15px rgba(6, 182, 212, 0.1); }
-.status-card { margin: 20px 0; padding: 20px; text-align: center; border: 1px dashed var(--cyan); background: rgba(6,182,212,0.05); border-radius: 8px;}
-.custom-file-upload { display: inline-block; padding: 8px 20px; background: var(--bg-card); border: 1px solid var(--text-secondary); cursor: pointer; margin-top: 10px; border-radius: 5px; }
-input[type="file"] { display: none; }
+
+.total-count-badge {
+    background: rgba(6, 182, 212, 0.15);
+    color: var(--cyan);
+    padding: 5px 15px;
+    border-radius: 20px;
+    font-size: 14px;
+    font-weight: bold;
+    border: 1px solid var(--cyan);
+}
+
+.search-radios {
+    display: flex;
+    gap: 15px;
+}
+
+.search-radios label {
+    font-size: 14px;
+    color: var(--text-secondary);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.search-radios input[type="radio"] {
+    accent-color: var(--gold);
+    cursor: pointer;
+}
+
+/* SUGGESTION DROPDOWN STYLE */
+.search-input-box { position: relative; }
+
+.suggestion-box {
+    position: absolute;
+    top: 105%;
+    left: 0;
+    width: 100%;
+    background: #1e293b;
+    border: 1px solid var(--gold);
+    border-radius: 0 0 8px 8px;
+    max-height: 300px;
+    overflow-y: auto;
+    z-index: 1000;
+    display: none; /* Hidden by default */
+    box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+}
+
+.suggestion-item {
+    padding: 12px 15px;
+    border-bottom: 1px solid #334155;
+    cursor: pointer;
+    font-size: 15px;
+    color: #cbd5e1;
+    display: grid;
+    grid-template-columns: 50px 1fr 1fr; /* SL | Name | Father */
+    gap: 10px;
+    transition: 0.2s;
+}
+
+.suggestion-item:hover {
+    background: var(--bg-card);
+    color: var(--gold);
+    padding-left: 20px;
+}
+
+.suggestion-header-label {
+    font-size: 12px;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    padding: 5px 15px;
+    background: #0f172a;
+    border-bottom: 1px solid #334155;
+}
 
 /* --- DETAIL CARD (PRO) --- */
 .detail-view-wrapper {
