@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VVDAS - গ্রাম ভোটার সেবা</title>
+    <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Excel Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- LOGIN MODAL (Blocks UI until logged in) -->
+    <div id="loginModal" class="modal-overlay">
+        <div class="modal-box">
+            <h2>নিরাপত্তা যাচাই</h2>
+            <p id="loginMessage">এই গ্রামের তথ্য দেখতে লগইন করুন</p>
+            <input type="text" id="username" placeholder="ইউজারনেম">
+            <input type="password" id="password" placeholder="পাসওয়ার্ড">
+            <button onclick="performLogin()">লগইন</button>
+            <p id="loginError" style="color:red; display:none; margin-top:10px;">ভুল তথ্য!</p>
+        </div>
+    </div>
+
+    <!-- MAIN HEADER -->
+    <header>
+        <div class="container header-content">
+            <div class="brand">
+                <small>VVDAS System</small>
+                <h1>গ্রাম ভোটার তথ্য</h1>
+            </div>
+            
+            <div class="controls">
+                <!-- Village Selector -->
+                <select id="villageSelect" onchange="changeVillage()">
+                    <!-- Options populated by JS -->
+                </select>
+
+                <!-- Gender Toggle -->
+                <div class="gender-toggle">
+                    <button id="btnM" class="active" onclick="changeGender('M')">পুরুষ</button>
+                    <button id="btnF" onclick="changeGender('F')">নারী</button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- SEARCH SECTION -->
+    <div class="container search-section">
+        <div class="search-card">
+            <div class="filter-options">
+                <label><input type="radio" name="searchType" value="sl"> ক্রমিক</label>
+                <label><input type="radio" name="searchType" value="name" checked> নাম</label>
+                <label><input type="radio" name="searchType" value="father"> পিতা/স্বামী</label>
+            </div>
+            
+            <div class="input-wrapper">
+                <input type="text" id="searchInput" placeholder="তথ্য খুঁজুন..." autocomplete="off">
+                <!-- Suggestion Box -->
+                <div id="suggestionBox" class="suggestion-box"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- DATA TABLE -->
+    <div class="container table-container">
+        <div id="loading" style="display:none;">ডেটা লোড হচ্ছে...</div>
+        <table id="voterTable">
+            <thead>
+                <tr>
+                    <th>ক্রমিক</th>
+                    <th>নাম</th>
+                    <th>পিতা/স্বামী</th>
+                    <th>অন্যান্য তথ্য</th>
+                </tr>
+            </thead>
+            <tbody id="tableBody">
+                <!-- Rows populated by JS -->
+            </tbody>
+        </table>
+    </div>
+
+    <!-- DETAILS POPUP (Bottom Sheet style) -->
+    <div id="detailsCard" class="details-card">
+        <button class="close-btn" onclick="closeDetails()">✖</button>
+        <div id="detailsContent"></div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

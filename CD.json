@@ -1,0 +1,113 @@
+[
+    {
+        "username": "admin",
+        "password": "vote2026",
+        "access": "all",
+        "note": "Super Admin - Can access all villages"
+    },
+    {
+        "username": "garadob",
+        "password": "123",
+        "access": "গাড়াডোব"
+    },
+    {
+        "username": "azan",
+        "password": "123",
+        "access": "আযান"
+    },
+    {
+        "username": "juginda",
+        "password": "123",
+        "access": "যুগিন্দা"
+    },
+    {
+        "username": "bahagunda",
+        "password": "123",
+        "access": "বাহাগুন্দা"
+    },
+    {
+        "username": "dhepa",
+        "password": "123",
+        "access": "ঢেপা"
+    },
+    {
+        "username": "pakuria",
+        "password": "123",
+        "access": "পাকুড়িয়া"
+    },
+    {
+        "username": "chitla",
+        "password": "123",
+        "access": "চিৎলা"
+    },
+    {
+        "username": "nityanandanpur",
+        "password": "123",
+        "access": "নিত্যনন্দনপুর"
+    },
+    {
+        "username": "khorompur",
+        "password": "123",
+        "access": "খরমপুর"
+    },
+    {
+        "username": "kochuikhali",
+        "password": "123",
+        "access": "কচুইখালি"
+    },
+    {
+        "username": "bhatpara",
+        "password": "123",
+        "access": "ভাটপড়া"
+    },
+    {
+        "username": "dighalkandi",
+        "password": "123",
+        "access": "দীঘলকান্দি"
+    },
+    {
+        "username": "kasba",
+        "password": "123",
+        "access": "কসবা"
+    },
+    {
+        "username": "dhankhola",
+        "password": "123",
+        "access": "ধানখোলা"
+    },
+    {
+        "username": "south_tetulbaria",
+        "password": "123",
+        "access": "দক্ষিণ তেতুলবাড়িয়া"
+    },
+    {
+        "username": "mohishakhola",
+        "password": "123",
+        "access": "মহিষাখোলা"
+    },
+    {
+        "username": "arpara",
+        "password": "123",
+        "access": "আড়পাড়া"
+    },
+    {
+        "username": "jalshuka",
+        "password": "123",
+        "access": "জালশুকা"
+    },
+    {
+        "username": "chandamari",
+        "password": "123",
+        "access": "চান্দামারী"
+    },
+    {
+        "username": "ber",
+        "password": "123",
+        "access": "বেড়"
+    },
+    {
+        "username": "shanghat",
+        "password": "123",
+        "access": "শানঘাট"
+    }
+]
