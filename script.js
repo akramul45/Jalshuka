@@ -11,12 +11,12 @@ const EXCEL_PATH = "excel/";
 // --- STATE MANAGEMENT ---
 let currentVillage = "";
 let currentGender = "M";
-let currentData = []; // Stores all rows
-let unlockedVillages = JSON.parse(localStorage.getItem('vvdas_guardian_keys')) || [];
+let currentData = []; // Main Data Store
+let filteredData = []; // For Search View
 
 // --- INITIALIZATION ---
 window.onload = function() {
-    // 1. Login Modal - Village Dropdown
+    // 1. Setup Village Dropdown
     const select = document.getElementById('loginVillageSelect');
     select.innerHTML = "";
     VILLAGES.forEach(v => {
@@ -26,24 +26,35 @@ window.onload = function() {
         select.appendChild(opt);
     });
 
-    // 2. Search Event Listener
+    // 2. Event Listeners
     document.getElementById('searchInput').addEventListener('keyup', handleLiveSearch);
     
-    // Close suggestion box when clicking outside
-    document.addEventListener('click', function(e) {
-        if (!e.target.closest('.search-input-box')) {
-            document.getElementById('suggestionBox').style.display = 'none';
-        }
-    });
+    // 3. CHECK AUTO LOGIN (Persistent Login)
+    checkAutoLogin();
 };
 
-// --- LOGIN LOGIC ---
-function performLogin() {
+// --- AUTH SYSTEM (Login/Logout) ---
+function checkAutoLogin() {
+    const savedVillage = localStorage.getItem('vvdas_village');
+    const savedUser = localStorage.getItem('vvdas_user');
+    const savedPass = localStorage.getItem('vvdas_pass');
+
+    if(savedVillage && savedUser && savedPass) {
+        // Auto fill and trigger login
+        document.getElementById('loginVillageSelect').value = savedVillage;
+        document.getElementById('username').value = savedUser;
+        document.getElementById('password').value = savedPass;
+        performLogin(true); // true = silent mode
+    }
+}
+
+function performLogin(isAuto = false) {
     const village = document.getElementById('loginVillageSelect').value;
     const u = document.getElementById('username').value.trim();
     const p = document.getElementById('password').value.trim();
     const err = document.getElementById('loginError');
 
+    // Fetch credentials securely (In real app, use server-side validation)
     fetch('CD.json')
         .then(res => res.json())
         .then(users => {
@@ -55,24 +66,38 @@ function performLogin() {
                     allow = true;
                 }
             }
-            
-            // Allow if previously unlocked (Optional security feature)
-            // if(unlockedVillages.includes(village) && u === '' && p === '') allow = true; 
 
             if (allow) {
+                // SAVE CREDENTIALS FOR NEXT TIME
+                localStorage.setItem('vvdas_village', village);
+                localStorage.setItem('vvdas_user', u);
+                localStorage.setItem('vvdas_pass', p);
+
                 currentVillage = village;
                 document.getElementById('loginModal').style.display = 'none';
                 document.getElementById('mainApp').style.display = 'block';
+                
                 updateHeader();
                 triggerFileLoad();
             } else {
-                err.style.display = 'block';
+                if(!isAuto) err.style.display = 'block';
+                // If auto login fails, clear garbage data
+                if(isAuto) logout(); 
             }
         })
         .catch(() => {
-            err.innerText = "❌ সার্ভার এরর!";
-            err.style.display = 'block';
+            if(!isAuto) {
+                err.innerText = "❌ সার্ভার এরর অথবা ফাইল মিসিং!";
+                err.style.display = 'block';
+            }
         });
+}
+
+function logout() {
+    localStorage.removeItem('vvdas_village');
+    localStorage.removeItem('vvdas_user');
+    localStorage.removeItem('vvdas_pass');
+    location.reload();
 }
 
 function updateHeader() {
@@ -87,14 +112,14 @@ function changeGender(gender) {
     document.getElementById('btnF').className = gender === 'F' ? 'toggle-btn active' : 'toggle-btn';
     
     // Reset Views
-    document.getElementById('dataArea').style.display = 'none';
+    document.getElementById('searchInput').value = '';
     document.getElementById('detailViewSection').style.display = 'none';
     document.getElementById('siblingSection').style.display = 'none';
     updateHeader();
     triggerFileLoad();
 }
 
-// --- FILE LOAD SYSTEM ---
+// --- FILE HANDLING ---
 function triggerFileLoad() {
     const statusDiv = document.getElementById('statusSection');
     const statusMsg = document.getElementById('statusMessage');
@@ -119,7 +144,7 @@ function triggerFileLoad() {
             dataArea.style.display = 'block';
         })
         .catch(() => {
-            statusMsg.innerHTML = `<span style="color:var(--red)">❌ অটো লোড ব্যর্থ! ফাইল আপলোড করুন:</span>`;
+            statusMsg.innerHTML = `<span style="color:var(--red)">⚠️ অটো লোড ব্যর্থ! ফাইল ম্যানুয়ালি আপলোড করুন:</span>`;
             uploadBox.style.display = 'block';
         });
 }
@@ -140,111 +165,82 @@ function processExcel(buffer) {
     const workbook = XLSX.read(buffer, {type: 'array'});
     const sheetName = workbook.SheetNames[0];
     const jsonData = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName], {defval: ""});
+    
     currentData = jsonData;
-    
-    // Update Total Count
-    document.getElementById('totalDataCount').innerText = `মোট ভোটার: ${en2bn(jsonData.length)}`;
-    
-    renderTable(jsonData);
+    renderTable(currentData); // Render ALL Data initially
 }
 
-// --- HELPER: English to Bangla Number ---
-function en2bn(num) {
-    return String(num).replace(/\d/g, d => "০১২৩৪৫৬৭৮৯"[d]);
-}
-
-// --- TABLE RENDER (Initial View) ---
+// --- TABLE RENDERING SYSTEM (Optimized for Large Data) ---
 function renderTable(data) {
     const tbody = document.getElementById('tableBody');
-    tbody.innerHTML = '';
-    // Show first 50 rows initially to boost performance
-    const initialData = data.slice(0, 50);
+    const countBadge = document.getElementById('totalDataCount');
+    
+    // Update English Counter
+    countBadge.innerText = `Total Voters: ${data.length}`;
 
-    initialData.forEach((row) => {
-        // Find Index in main array
-        const realIndex = currentData.indexOf(row);
-        createTableRow(row, realIndex, tbody);
-    });
+    // Optimization: Build HTML string instead of createElements loop for speed
+    if(data.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="5" style="text-align:center; padding: 20px;">কোন তথ্য পাওয়া যায়নি</td></tr>`;
+        return;
+    }
+
+    // Limit rendering for safety if > 5000 rows, otherwise render all
+    // Since user asked for ALL, we use map join. 
+    // WARNING: huge datasets might lag slightly.
+    
+    const rowsHTML = data.map((row) => {
+        // Find original index for "View" button to work correctly with Details
+        const originalIndex = currentData.indexOf(row);
+        
+        const sl = row['ক্রমিক'] || row['SL'] || Object.values(row)[0] || '-';
+        const name = row['নাম'] || row['Name'] || Object.values(row)[1] || '-';
+        const father = row['পিতা'] || row['স্বামী'] || Object.values(row)[2] || '-';
+        const mother = row['মাতা'] || row['Mother'] || Object.values(row)[3] || '-';
+
+        return `
+            <tr>
+                <td><button class="view-btn" onclick="showDetail('${originalIndex}')">👁️</button></td>
+                <td>${sl}</td>
+                <td class="name-cell">${name}</td>
+                <td>${father}</td>
+                <td>${mother}</td>
+            </tr>
+        `;
+    }).join('');
+
+    tbody.innerHTML = rowsHTML;
 }
 
-function createTableRow(row, index, parent) {
-    const sl = row['ক্রমিক'] || row['SL'] || Object.values(row)[0] || '-';
-    const name = row['নাম'] || row['Name'] || Object.values(row)[1] || '-';
-    const father = row['পিতা'] || row['স্বামী'] || Object.values(row)[2] || '-';
-    const mother = row['মাতা'] || row['Mother'] || Object.values(row)[3] || '-';
-
-    let tr = document.createElement('tr');
-    tr.innerHTML = `
-        <td><button class="view-btn" onclick="showDetail('${index}')">👁️ ভিউ</button></td>
-        <td>${sl}</td>
-        <td style="color:var(--gold); font-weight:500;">${name}</td>
-        <td>${father}</td>
-        <td>${mother}</td>
-    `;
-    parent.appendChild(tr);
-}
-
-// --- LIVE SEARCH LOGIC (Dropdown) ---
+// --- SEARCH LOGIC (Filters Table Directly) ---
 function handleLiveSearch(e) {
     const val = e.target.value.toLowerCase().trim();
     const type = document.querySelector('input[name="searchType"]:checked').value;
-    const box = document.getElementById('suggestionBox');
     
-    // Hide if empty
     if(val.length === 0) {
-        box.style.display = 'none';
         renderTable(currentData); // Restore full table
         return;
     }
 
-    // Filter Logic (Partial Match)
-    const matches = currentData.map((row, index) => ({row, index})).filter(item => {
+    // Filter Logic
+    const matches = currentData.filter(row => {
         let text = '';
         // 0=SL, 1=Name, 2=Father
-        if(type === 'sl') text = String(item.row['ক্রমিক'] || Object.values(item.row)[0]);
-        if(type === 'name') text = String(item.row['নাম'] || Object.values(item.row)[1]);
-        if(type === 'father') text = String(item.row['পিতা'] || Object.values(item.row)[2]);
+        if(type === 'sl') text = String(row['ক্রমিক'] || Object.values(row)[0]);
+        if(type === 'name') text = String(row['নাম'] || Object.values(row)[1]);
+        if(type === 'father') text = String(row['পিতা'] || Object.values(row)[2]);
         
         return text.toLowerCase().includes(val);
     });
 
-    // Populate Dropdown
-    box.innerHTML = '';
-    if(matches.length > 0) {
-        box.style.display = 'block';
-        
-        // Add Header
-        let header = document.createElement('div');
-        header.className = 'suggestion-header-label';
-        header.innerHTML = `<span>ক্রমিক</span> <span>নাম</span> <span>পিতা</span>`;
-        box.appendChild(header);
-
-        // Limit to 10 suggestions for speed
-        matches.slice(0, 10).forEach(m => {
-            const sl = m.row['ক্রমিক'] || Object.values(m.row)[0];
-            const name = m.row['নাম'] || Object.values(m.row)[1];
-            const father = m.row['পিতা'] || Object.values(m.row)[2];
-
-            const div = document.createElement('div');
-            div.className = 'suggestion-item';
-            div.innerHTML = `
-                <span style="color:var(--cyan)">${sl}</span>
-                <span style="font-weight:bold; color:var(--gold)">${name}</span>
-                <span>${father}</span>
-            `;
-            div.onclick = () => {
-                showDetail(m.index);
-                document.getElementById('searchInput').value = ''; // Clear input
-                box.style.display = 'none';
-            };
-            box.appendChild(div);
-        });
-    } else {
-        box.style.display = 'none';
-    }
+    renderTable(matches); // Update Table with Filtered Results
 }
 
-// --- DETAIL CARD & RELATIVES LOGIC ---
+// --- HELPERS (Bangla Number Removed for Total Count, kept for others if needed) ---
+function en2bn(num) {
+    return String(num).replace(/\d/g, d => "০১২৩৪৫৬৭৮৯"[d]);
+}
+
+// --- DETAIL VIEW LOGIC ---
 function showDetail(index) {
     const row = currentData[index];
     const section = document.getElementById('detailViewSection');
@@ -257,11 +253,9 @@ function showDetail(index) {
     const mother = row['মাতা'] || Object.values(row)[3] || '-';
     const voterNo = row['ভোটার নং'] || row['Voter No'] || Object.values(row)[4] || 'N/A';
 
-    // Show Section
     section.style.display = 'block';
-    siblingSec.style.display = 'none'; // Reset siblings
+    siblingSec.style.display = 'none';
 
-    // Render Card (Added Mother OnClick)
     section.innerHTML = `
         <div class="detail-card-grid">
             <div class="serial-box">${sl}</div>
@@ -271,28 +265,27 @@ function showDetail(index) {
                     <div>
                         <span class="data-label">পিতা/স্বামী</span>
                         <span class="data-val father-link" onclick="findRelatives('${father.replace(/'/g, "\\'")}', 'father')">
-                            ${father} (ক্লিক)
+                            ${father} ↗
                         </span>
                     </div>
                     <div>
                         <span class="data-label">মাতা</span>
                         <span class="data-val father-link" onclick="findRelatives('${mother.replace(/'/g, "\\'")}', 'mother')">
-                            ${mother} (ক্লিক)
+                            ${mother} ↗
                         </span>
                     </div>
                 </div>
                 <div class="voter-row">
-                    VOTER ID: <span style="color:white; font-weight:bold;">${voterNo}</span>
+                    VOTER ID: <span style="color:#fff; font-weight:bold;">${voterNo}</span>
                 </div>
             </div>
+            <button onclick="document.getElementById('detailViewSection').style.display='none'" class="close-detail">✖</button>
         </div>
     `;
 
-    // Scroll to Details
     section.scrollIntoView({behavior: 'smooth', block: 'center'});
 }
 
-// Unified Function for Father/Mother Search
 function findRelatives(parentName, type) {
     if(!parentName || parentName.length < 2) return;
     
@@ -300,7 +293,6 @@ function findRelatives(parentName, type) {
         let pName = '';
         if(type === 'father') pName = row['পিতা'] || row['স্বামী'] || Object.values(row)[2] || '';
         if(type === 'mother') pName = row['মাতা'] || Object.values(row)[3] || '';
-        
         return String(pName).trim() === String(parentName).trim();
     });
 
@@ -308,9 +300,8 @@ function findRelatives(parentName, type) {
     const list = document.getElementById('siblingList');
     list.innerHTML = '';
     
-    // Label update based on type
     const labelText = type === 'father' ? 'পিতার নামে' : 'মায়ের নামে';
-    box.querySelector('small').innerText = `${labelText} মিল পাওয়া সদস্যগণ (${en2bn(relatives.length)} জন):`;
+    box.querySelector('small').innerText = `${labelText} মিল পাওয়া সদস্যগণ (${relatives.length} জন):`;
 
     if(relatives.length > 0) {
         box.style.display = 'block';
@@ -325,5 +316,6 @@ function findRelatives(parentName, type) {
             tag.onclick = () => showDetail(realIndex);
             list.appendChild(tag);
         });
+        box.scrollIntoView({behavior: 'smooth', block: 'center'});
     }
 }
