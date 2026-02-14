@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VVDAS - সিকিউরড ডেটাবেস</title>
+    <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div id="loginModal" class="modal-overlay">
+        <div class="modal-box">
+            <div class="modal-header">
+                <span style="font-size: 40px;">🛡️</span>
+                <h3>VVDAS সিকিউরিটি</h3>
+                <p>গ্রাম নির্বাচন করে লগইন করুন</p>
+            </div>
+            
+            <div class="modal-body">
+                <div class="input-group">
+                    <label>গ্রাম নির্বাচন</label>
+                    <select id="loginVillageSelect">
+                        </select>
+                </div>
+
+                <div class="input-group">
+                    <label>ইউজারনেম</label>
+                    <input type="text" id="username" placeholder="Username">
+                </div>
+                <div class="input-group">
+                    <label>পাসওয়ার্ড</label>
+                    <input type="password" id="password" placeholder="Password">
+                </div>
+                
+                <button class="guardian-btn" onclick="performLogin()">লগইন করুন</button>
+                <p id="loginError" class="error-msg">❌ তথ্য সঠিক নয়!</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="mainApp" style="display: none;">
+        
+        <header>
+            <div class="container nav-content">
+                <div class="logo-section">
+                    <span class="logo-icon">🛡️</span>
+                    <div>
+                        <h1 id="pageTitle">VVDAS সিস্টেম</h1>
+                        <small id="pageSubTitle">অপেক্ষা করুন...</small>
+                    </div>
+                </div>
+                
+                <div class="control-panel">
+                    <div class="toggle-wrapper">
+                        <button id="btnM" class="toggle-btn active" onclick="changeGender('M')">পুরুষ</button>
+                        <button id="btnF" class="toggle-btn" onclick="changeGender('F')">নারী</button>
+                    </div>
+                    <button class="logout-btn" onclick="location.reload()">🔒 Logout</button>
+                </div>
+            </div>
+        </header>
+
+        <main class="container">
+            
+            <div id="statusSection" class="status-card">
+                <p id="statusMessage">🔄 ডেটা লোড হচ্ছে...</p>
+                
+                <div id="uploadContainer" class="upload-box" style="display:none;">
+                    <p class="warning-text">⚠️ সার্ভারে ফাইল পাওয়া যায়নি। দয়া করে লোকাল ফাইল আপলোড করুন:</p>
+                    <input type="file" id="fileInput" accept=".xlsx, .xls" onchange="handleFileUpload(this)">
+                    <label for="fileInput" class="custom-file-upload">📂 ফাইল সিলেক্ট করুন</label>
+                </div>
+            </div>
+
+            <div id="dataArea" style="display: none;">
+                
+                <div class="search-container">
+                    <div class="search-header">
+                        <span>🔍 ভোটার অনুসন্ধান</span>
+                    </div>
+                    <div class="search-input-box">
+                        <input type="text" id="searchInput" placeholder="নাম বা ক্রমিক দিয়ে খুঁজুন..." autocomplete="off">
+                        <div id="suggestionBox" class="suggestion-box"></div>
+                    </div>
+                </div>
+
+                <div id="siblingSection" class="sibling-wrapper" style="display: none;">
+                    <small style="color:var(--text-secondary)">পিতার নামের মিল পাওয়া সদস্যগণ:</small>
+                    <div id="siblingList" class="sibling-list"></div>
+                </div>
+
+                <div id="detailViewSection" class="detail-view-wrapper" style="display: none;">
+                    </div>
+
+                <div class="table-wrapper">
+                    <table id="voterTable">
+                        <thead>
+                            <tr>
+                                <th width="50px">ভিউ</th>
+                                <th>ক্রমিক</th>
+                                <th>নাম</th>
+                                <th>পিতা</th>
+                                <th>মাতা</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tableBody">
+                            </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
