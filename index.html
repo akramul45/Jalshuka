@@ -76,16 +76,23 @@
 
             <div id="dataArea" style="display: none;">
                 
-                <div class="search-container">
-                    <div class="search-header">
-                        <span>🔍 ভোটার অনুসন্ধান</span>
-                    </div>
-                    <div class="search-input-box">
-                        <input type="text" id="searchInput" placeholder="নাম বা ক্রমিক দিয়ে খুঁজুন..." autocomplete="off">
-                        <div id="suggestionBox" class="suggestion-box"></div>
-                    </div>
-                </div>
+    <div class="search-container">
+    <div class="search-header">
+        <div id="totalDataCount" class="total-count-badge">মোট ভোটার: ০</div>
+        
+        <div class="search-radios">
+            <label><input type="radio" name="searchType" value="sl"> ক্রমিক</label>
+            <label><input type="radio" name="searchType" value="name" checked> নাম</label>
+            <label><input type="radio" name="searchType" value="father"> পিতা</label>
+        </div>
+    </div>
 
+    <div class="search-input-box">
+        <input type="text" id="searchInput" placeholder="তথ্য লিখে খুঁজুন..." autocomplete="off">
+        <div id="suggestionBox" class="suggestion-box"></div>
+    </div>
+</div>
+            
                 <div id="siblingSection" class="sibling-wrapper" style="display: none;">
                     <small style="color:var(--text-secondary)">পিতার নামের মিল পাওয়া সদস্যগণ:</small>
                     <div id="siblingList" class="sibling-list"></div>
