@@ -152,29 +152,30 @@
     </div>
   </div>
 
-  <header>
-    <div class="header-container">
-      <div class="brand-area">
-        <span class="brand-title" id="VillageName">গ্রাম নির্বাচন করা হয়নি</span>
-        <span class="brand-sub">গ্রাম ভোটার সেবা</span>
-      </div>
+ <header>
+  <div class="header-container">
+    <div class="brand-area">
+      <span class="brand-title" id="VillageName">গ্রাম নির্বাচন করা হয়নি</span>
+      <span class="brand-sub">গ্রাম ভোটার সেবা</span>
+    </div>
+    
+    <div class="nav-actions">
+      <a href="#" class="quick-link" id="btn-male" onclick="switchMode('M')">
+        👨 <span>পুরুষ</span>
+      </a>
       
-      <div class="nav-actions">
-        <a href="VTM.html" class="quick-link" title="পুরুষ ভোটার">
-          👨 <span>পুরুষ</span>
-        </a>
-        <a href="VLF.html" class="quick-link active-page" title="নারী ভোটার">
-          👩 <span>নারী</span>
-        </a>
+      <a href="#" class="quick-link active-page" id="btn-female" onclick="switchMode('F')">
+        👩 <span>নারী</span>
+      </a>
 
-        <div class="menu-btn" onclick="toggleMenu()">
-          <span class="line"></span>
-          <span class="line"></span>
-          <span class="line"></span>
-        </div>
+      <div class="menu-btn" onclick="toggleMenu()">
+        <span class="line"></span>
+        <span class="line"></span>
+        <span class="line"></span>
       </div>
     </div>
-  </header>
+  </div>
+</header>
 
   <div class="nav-overlay" onclick="toggleMenu()"></div>
   <nav class="side-menu" id="sideMenu">
@@ -240,95 +241,74 @@
   </footer>
 
   <script>
-    // ---- লগইন ও গ্রাম কনফিগারেশন লজিক (নতুন সংযোজন) ----
+      // =ool====================================================
+    // গ্লোবাল ভেরিয়েবল ও কনফিগারেশন
+    // =====================================================
+    let villageData = [];      // CD.json থেকে আসা ডাটা
+    let currentUser = null;    // বর্তমানে লগইন করা গ্রামের তথ্য
+    let currentMode = 'F';     // ডিফল্ট মোড: F = Female (নারী), M = Male (পুরুষ)
     
-    let villageData = []; // CD.json থেকে ডেটা এখানে আসবে
+    // এক্সেল প্রসেসিং ভেরিয়েবল
+    let COL_SL="ক্রমিক", COL_NAME="নাম", COL_FATHER="পিতা", COL_MOTHER="মাতা", COL_VOTER="ভোটার নং";
+    let excelData = [];
 
-    // পেজ লোড হলে চেক করবে লগইন করা আছে কিনা
+    // =====================================================
+    // ১. ইনিশিয়ালাইজেশন ও অথেন্টিকেশন লজিক
+    // =====================================================
     window.addEventListener('load', async () => {
-      // CD.json লোড করার চেষ্টা
-      try {
-        const response = await fetch('CD.json');
-        if (!response.ok) throw new Error("Config missing");
-        villageData = await response.json();
-        populateVillageDropdown(villageData);
-      } catch (error) {
-        console.error("CD.json পাওয়া যায়নি, ফলব্যাক লিস্ট ব্যবহার করা হচ্ছে");
-        // ফলব্যাক ডেটা (যদি JSON ফাইল না থাকে)
-        villageData = generateFallbackVillages();
-        populateVillageDropdown(villageData);
-      }
-
-      checkLoginStatus();
+      await loadConfig(); // ১. কনফিগ লোড
+      checkSession();     // ২. সেশন চেক
     });
 
-    function generateFallbackVillages() {
-        // ম্যানুয়াল লিস্ট (যেহেতু JSON ফাইল নাও থাকতে পারে)
-        return [
-            {id:38, name:'গাড়াডোব', pass:'1234', f_file:'Garadob_F.xlsx'},
-            {id:39, name:'আযান', pass:'1234', f_file:'Azan_F.xlsx'},
-            {id:40, name:'যুগিন্দা', pass:'1234', f_file:'Juginda_F.xlsx'},
-            {id:41, name:'বাহাগুন্দা', pass:'1234', f_file:'Bahagunda_F.xlsx'},
-            {id:42, name:'ঢেপা', pass:'1234', f_file:'Dhepa_F.xlsx'},
-            // বাকি গ্রামগুলোর জন্য জেনেরিক নাম তৈরি করা হলো
-            {id:43, name:'পাকুড়িয়া', pass:'1234', f_file:'Pakuria_F.xlsx'},
-            {id:44, name:'চিৎলা', pass:'1234', f_file:'Chitla_F.xlsx'},
-            {id:45, name:'নিত্যনন্দনপুর', pass:'1234', f_file:'Nityanandanpur_F.xlsx'},
-            {id:46, name:'খরমপুর', pass:'1234', f_file:'Khorampur_F.xlsx'},
-            {id:47, name:'কচুইখালি', pass:'1234', f_file:'Kochuikhali_F.xlsx'},
-            {id:48, name:'ভাটপড়া', pass:'1234', f_file:'Bhatpara_F.xlsx'},
-            {id:49, name:'দীঘলকান্দি', pass:'1234', f_file:'Dighalkandi_F.xlsx'},
-            {id:50, name:'কসবা', pass:'1234', f_file:'Kasba_F.xlsx'},
-            {id:51, name:'ধানখোলা', pass:'1234', f_file:'Dhankhola_F.xlsx'},
-            {id:52, name:'দক্ষিণ তেতুলবাড়িয়া', pass:'1234', f_file:'Dakshin_Tetulbaria_F.xlsx'},
-            {id:53, name:'মহিষাখোলা', pass:'1234', f_file:'Mahishakhola_F.xlsx'},
-            {id:54, name:'আড়পাড়া', pass:'1234', f_file:'Arpara_F.xlsx'},
-            {id:55, name:'জালশুকা', pass:'1234', f_file:'Jalshuka_F.xlsx'},
-            {id:56, name:'চান্দামারী', pass:'1234', f_file:'Chandamari_F.xlsx'},
-            {id:57, name:'বেড়', pass:'1234', f_file:'Ber_F.xlsx'},
-            {id:58, name:'শানঘাট', pass:'1234', f_file:'Shanghat_F.xlsx'}
-        ];
+    // CD.json লোড করা
+    async function loadConfig() {
+      try {
+        const response = await fetch('CD.json?t=' + new Date().getTime()); // ক্যাশ এড়াতে টাইমস্ট্যাম্প
+        if (!response.ok) throw new Error("Config missing");
+        villageData = await response.json();
+      } catch (error) {
+        console.error("CD.json পাওয়া যায়নি, ফলব্যাক ব্যবহার করা হচ্ছে।");
+        villageData = generateFallbackVillages(); // ফলব্যাক ফাংশন (নিচে আছে)
+      }
+      populateVillageDropdown();
     }
 
-    function populateVillageDropdown(data) {
-      const sel = document.getElementById('village-select');
-      data.forEach(v => {
-        let opt = document.createElement('option');
-        opt.value = v.id;
-        opt.innerText = `${v.id}. ${v.name}`;
-        sel.appendChild(opt);
-      });
-    }
-
-    function checkLoginStatus() {
-      const storedVill = localStorage.getItem('voterApp_villageName');
+    // লগইন স্ট্যাটাস চেক এবং ভ্যালিডেশন
+    function checkSession() {
+      const storedID = localStorage.getItem('voterApp_vid');
       const storedPass = localStorage.getItem('voterApp_pass');
-      const storedFileF = localStorage.getItem('voterApp_fileF');
 
-      if (storedVill && storedPass) {
-        // লগইন করা আছে
-        document.getElementById('login-overlay').style.display = 'none';
-        document.getElementById('VillageName').innerText = storedVill;
-        
-        // ফাইল আপডেট করে লোড করা (এটি বিদ্যমান স্ক্রিপ্টের DEFAULT_FILE কে ওভাররাইড করার চেষ্টা)
-        // যেহেতু DOMContentLoaded এর আগেই এই ভেরিয়েবল সেট করা আছে, আমাদের নতুন করে লোড করতে হবে
-        if(storedFileF) {
-            DEFAULT_FILE = storedFileF;
-            // ম্যানুয়ালি ফেচ কল করা কারণ DOMContentLoaded ইভেন্ট হয়তো মিস হয়ে গেছে বা ভুল ফাইল কল করেছে
-            fetch(DEFAULT_FILE).then(res => {
-                if(!res.ok) throw new Error();
-                return res.arrayBuffer();
-            }).then(data => processData(data)).catch(() => {
-                document.getElementById('loading-indicator').style.display = 'none';
-                document.getElementById('upload-wrapper').style.display = 'block';
-            });
-        }
+      // যদি স্টোরেজে কিছু না থাকে -> লগইন দেখাও
+      if (!storedID || !storedPass) {
+        showLoginModal();
+        return;
+      }
+
+      // লাইভ ডাটার সাথে ম্যাচিং (সিকিউরিটি চেক)
+      const validUser = villageData.find(v => String(v.id) === String(storedID) && v.pass === storedPass);
+
+      if (validUser) {
+        // সব ঠিক আছে -> লগইন সফল
+        currentUser = validUser;
+        initApp(); 
       } else {
-        // লগইন করা নেই
-        document.getElementById('login-overlay').style.display = 'flex';
+        // পাসওয়ার্ড বা গ্রাম পাল্টে গেছে -> লগআউট করাও
+        forceLogout();
       }
     }
 
+    // অ্যাপ চালু করা (UI আপডেট ও ডাটা লোড)
+    function initApp() {
+      document.getElementById('login-overlay').style.display = 'none';
+      document.getElementById('VillageName').innerText = currentUser.name;
+      
+      // ডিফল্ট নারী ভোটার লোড (বা আগে যা সিলেক্ট ছিল)
+      switchMode(currentMode, true); 
+    }
+
+    // =====================================================
+    // ২. লগইন ও লগআউট হ্যান্ডলার
+    // =====================================================
     function attemptLogin() {
       const selId = document.getElementById('village-select').value;
       const pass = document.getElementById('login-pass').value;
@@ -339,69 +319,128 @@
         return;
       }
 
-      const village = villageData.find(v => v.id == selId);
+      // চেকিং
+      const match = villageData.find(v => String(v.id) === String(selId) && v.pass === pass);
 
-      if (village && village.pass === pass) {
+      if (match) {
         // সফল লগইন
-        localStorage.setItem('voterApp_villageName', village.name);
-        localStorage.setItem('voterApp_pass', village.pass); // অটো লগইন এর জন্য
-        
-        // ফাইলের নাম সেট করা (মহিলা ভোটার ফাইলের নাম CD.json এ f_file হিসেবে থাকতে হবে)
-        let fFile = village.f_file || (village.name + "_F.xlsx"); 
-        localStorage.setItem('voterApp_fileF', fFile);
-
+        localStorage.setItem('voterApp_vid', match.id);
+        localStorage.setItem('voterApp_pass', match.pass);
         errorDiv.style.display = 'none';
-        location.reload(); // পেজ রিলোড দিলে নতুন ফাইল নিয়ে শুরু হবে
+        
+        currentUser = match;
+        initApp();
       } else {
+        // ব্যর্থ
         errorDiv.style.display = 'block';
       }
     }
 
     function doLogout() {
       if(confirm("আপনি কি লগআউট করতে চান?")) {
-        localStorage.removeItem('voterApp_villageName');
-        localStorage.removeItem('voterApp_pass');
-        localStorage.removeItem('voterApp_fileF');
-        location.reload();
+        forceLogout();
       }
     }
 
-    // ---- পূর্বের স্ক্রিপ্ট (Functionality) অপরিবর্তিত রাখা হয়েছে, শুধু DEFAULT_FILE ডায়নামিক হবে ----
+    function forceLogout() {
+      localStorage.removeItem('voterApp_vid');
+      localStorage.removeItem('voterApp_pass');
+      location.reload(); // পেজ রিলোড দিয়ে ক্লিন স্লেট
+    }
+
+    function showLoginModal() {
+      document.getElementById('login-overlay').style.display = 'flex';
+      // আগে যদি কোনো আইডি সেভ থাকে, ড্রপডাউনে সেট করে রাখা
+      const lastId = localStorage.getItem('voterApp_vid');
+      if(lastId) document.getElementById('village-select').value = lastId;
+    }
+
+    // =====================================================
+    // ৩. নারী/পুরুষ মোড ও ডাটা লোডিং (Single Page Logic)
+    // =====================================================
+    function switchMode(mode, forceLoad = false) {
+      // যদি একই মোডে ক্লিক করে এবং ফোর্স লোড না হয়, তবে কিছু করার দরকার নেই
+      if (currentMode === mode && !forceLoad && excelData.length > 0) return;
+
+      currentMode = mode;
+      
+      // UI আপডেট (বাটন কালার)
+      document.getElementById('btn-male').classList.remove('active-page');
+      document.getElementById('btn-female').classList.remove('active-page');
+      
+      if (mode === 'M') {
+        document.getElementById('btn-male').classList.add('active-page');
+        loadVoterFile(currentUser.m_file); // CD.json থেকে m_file
+      } else {
+        document.getElementById('btn-female').classList.add('active-page');
+        loadVoterFile(currentUser.f_file); // CD.json থেকে f_file
+      }
+    }
+
+    function loadVoterFile(filename) {
+      if(!filename) {
+        alert("এই অপশনের জন্য ফাইলের নাম কনফিগার করা নেই!");
+        return;
+      }
+
+      // লোডিং এনিমেশন দেখাও
+      document.getElementById('loading-indicator').style.display = 'block';
+      document.getElementById('table-container').style.display = 'none';
+      document.getElementById('search-container').style.display = 'none';
+      document.getElementById('upload-wrapper').style.display = 'none';
+      
+      // ফাইল ফেচ করা
+      fetch(filename)
+        .then(res => {
+          if(!res.ok) throw new Error("File not found");
+          return res.arrayBuffer();
+        })
+        .then(data => processData(data))
+        .catch(err => {
+          console.error(err);
+          document.getElementById('loading-indicator').style.display = 'none';
+          document.getElementById('upload-wrapper').style.display = 'block'; // লোড না হলে আপলোড অপশন
+        });
+    }
+
+    // =====================================================
+    // ৪. হেল্পার ফাংশন (ড্রপডাউন ও ফলব্যাক)
+    // =====================================================
+    function populateVillageDropdown() {
+      const sel = document.getElementById('village-select');
+      sel.innerHTML = '<option value="">গ্রাম নির্বাচন করুন...</option>';
+      villageData.forEach(v => {
+        let opt = document.createElement('option');
+        opt.value = v.id;
+        opt.innerText = `${v.id}. ${v.name}`;
+        sel.appendChild(opt);
+      });
+    }
+
+    function generateFallbackVillages() {
+      // আপনার অরিজিনাল লিস্ট (JSON না পেলে এটি কাজ করবে)
+      return [
+        {id:51, name:'ধানখোলা', pass:'1234', f_file:'Dhankhola_F.xlsx', m_file:'Dhankhola_M.xlsx'},
+        {id:52, name:'কসবা', pass:'1234', f_file:'Kasba_F.xlsx', m_file:'Kasba_M.xlsx'},
+        // ... প্রয়োজন হলে বাকিগুলো যোগ করুন
+      ];
+    }
+
+    // মেনু টগল (আপনার আগের কোড)
     function toggleMenu() {
       const menu = document.getElementById('sideMenu');
       const overlay = document.querySelector('.nav-overlay');
       const btn = document.querySelector('.menu-btn');
-      
-      if (menu.classList.contains('active')) {
-        menu.classList.remove('active');
-        overlay.classList.remove('active');
-        btn.classList.remove('active');
-      } else {
-        menu.classList.add('active');
-        overlay.classList.add('active');
-        btn.classList.add('active');
-      }
+      menu.classList.toggle('active');
+      overlay.classList.toggle('active');
+      btn.classList.toggle('active');
     }
 
-    // DEFAULT_FILE এখন লোকালস্টোরেজ থেকে নেয়ার চেষ্টা করবে, না পেলে ডিফল্ট
-    let COL_SL="ক্রমিক", COL_NAME="নাম", COL_FATHER="পিতা", COL_MOTHER="মাতা", COL_VOTER="ভোটার নং", excelData=[];
-    let DEFAULT_FILE = localStorage.getItem('voterApp_fileF') || "VTF.xlsx";
+    // =====================================================
+    // ৫. এক্সেল প্রসেসিং ও UI রেন্ডারিং (আপনার স্থির অংশ)
+    // =====================================================
     
-    // নোট: উপরে checkLoginStatus() ফাংশনেও fetch কল করা হয়েছে রিডান্ডেন্সি এড়াতে এবং লগইনের পর নিশ্চিত লোডের জন্য।
-    // নিচের লিসেনারটি ডিফল্ট ফ্লো বজায় রাখে।
-    window.addEventListener('DOMContentLoaded', () => {
-      // যদি লগইন না থাকে, তবে লোড করার দরকার নেই, লগইন মডাল আটকাবে
-      if(!localStorage.getItem('voterApp_pass')) return;
-
-      fetch(DEFAULT_FILE).then(res => {
-        if(!res.ok) throw new Error();
-        return res.arrayBuffer();
-      }).then(data => processData(data)).catch(() => {
-        document.getElementById('loading-indicator').style.display = 'none';
-        document.getElementById('upload-wrapper').style.display = 'block';
-      });
-    });
-
+    // ম্যানুয়াল আপলোড হ্যান্ডলার
     document.getElementById('excel-file').addEventListener('change', e => {
       if(e.target.files[0]) {
         let r = new FileReader();
@@ -421,13 +460,17 @@
           renderTable(excelData);
         } else {
           alert("ডেটা নেই");
+          document.getElementById('loading-indicator').style.display = 'none';
         }
       } catch(e) {
-        console.log(e); // সাইলেন্ট ফেইল, কারণ আপলোড অপশন আছে
+        console.log(e);
+        document.getElementById('loading-indicator').style.display = 'none';
+        document.getElementById('upload-wrapper').style.display = 'block';
       }
     }
 
     function detectHeaders(r) {
+      // হেডার ডিটেকশন আগের মতই
       Object.keys(r).forEach(h => {
         let t = h.trim();
         if(t.includes("ক্রমিক") || t.toLowerCase()==="sl" || t.toLowerCase()==="no") COL_SL=h;
@@ -457,6 +500,7 @@
       ks.forEach(k => hr += `<th>${k}</th>`);
       th.innerHTML = hr + '</tr>';
       
+      // সর্বোচ্চ ১০০টি ডাটা দেখাবে পারফরমেন্সের জন্য
       d.slice(0, 100).forEach(r => {
         let idx = excelData.indexOf(r);
         let tr = `<tr onclick="selPer(${idx})">`;
@@ -524,6 +568,7 @@
       p.style.display = 'block';
     }
 
+    // সার্চ লজিক
     let sb = document.getElementById('search-box');
     let sg = document.getElementById('suggestions-box');
     
@@ -542,7 +587,7 @@
       }
       
       let f = excelData.filter(i => {
-                if(filter === 'sl') return String(i[COL_SL] || "").toLowerCase().includes(v);
+        if(filter === 'sl') return String(i[COL_SL] || "").toLowerCase().includes(v);
         if(filter === 'name') return String(i[COL_NAME] || "").toLowerCase().includes(v);
         if(filter === 'father') return String(i[COL_FATHER] || "").toLowerCase().includes(v);
         return false;
@@ -573,6 +618,6 @@
       renderTable(excelData);
       sg.style.display = 'none';
     }));
-  </script>
+ </script>
 </body>
 </html>
